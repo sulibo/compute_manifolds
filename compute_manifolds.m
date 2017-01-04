@@ -49,7 +49,8 @@ else N=length(G);
 end
 
 % part 1: create all combinations
-
+% G is a cell 
+if iscell(G) 
 A=[0;1];
 
 for k=1:N-2;
@@ -67,10 +68,69 @@ end
 A=[zeros(size(A,1),1) A];
 partitions=A;
 A=A(1:end-1,:);
+% G is a matrix 
+else
+    if couplingtype == 1
+        Grow = G*ones(size(G,2),1);
+        if norm(mod(G,1))==0
+        %disp('integer adjacency matrix')
+        [Grows,IA,IC] = unique(Grow);
+        else % non-integer row sum
+            if nargin~=3
+            disp('incorrected number of inputs (tolerance for non-integer adjacency matrix to be specified)');
+            return
+            else
+        epsilon=varargin{1};
+        tolu=epsilon/max(abs(Grow(:)));
+        [Grows,IA,IC] = unique(Grow,tolu);
+            end
+        end
 
+        if length(IA)==N
+            disp('No partial synchronization manifolds exists')
+            return
+        end
+
+        A=[0];
+        for k=2:N
+            B=[];
+            for l=1:size(A,1)
+                index=(IC(k)==IC(1:k-1));
+                Arow=A(l,:);
+                Arow=Arow';
+                Poss=unique(Arow(index));
+                Poss=[Poss;max(Arow)+1];
+                for m=1:length(Poss)
+                    B=[B;A(l,:) Poss(m)];
+                end
+            end
+            A=B;
+        end
+        partitions=A;
+        A=A(1:end-1,:);
+    else
+        A=[0;1];
+
+        for k=1:N-2;
+        B=[];
+        for l=1:size(A,1);
+            for m=0:max(A(l,:))+1, 
+                B=[B; [A(l,:) m]  ];
+            end
+        end
+        A=B;
+        end
+
+%disp('list of all partitions')
+
+A=[zeros(size(A,1),1) A];
+partitions=A;
+A=A(1:end-1,:);
+     
+    end
 %disp('click to continue')
 %pause
-
+end
 % part 2: check manifolds - conditions with row sums
 
 
