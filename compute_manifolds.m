@@ -51,26 +51,10 @@ end
 % part 1: create all combinations
 % G is a cell 
 if iscell(G) 
-A=[0;1];
-
-for k=1:N-2;
-   B=[];
-   for l=1:size(A,1);
-       for m=0:max(A(l,:))+1, 
-       B=[B; [A(l,:) m]  ];
-       end
-   end
-   A=B;
-end
-
-%disp('list of all partitions')
-
-A=[zeros(size(A,1),1) A];
-partitions=A;
-A=A(1:end-1,:);
+    [A, partitions]=generate_partition_universal(G);
 % G is a matrix 
 else
-    if couplingtype == 1
+    if couplingtype == 1 % Invasive
         Grow = G*ones(size(G,2),1);
         if norm(mod(G,1))==0
         %disp('integer adjacency matrix')
@@ -108,7 +92,7 @@ else
         end
         partitions=A;
         A=A(1:end-1,:);
-    else
+    else % Non invasive
         A=[0;1];
 
         for k=1:N-2;
@@ -561,7 +545,7 @@ function y=rowsum(bl);
 end
     
 
-function y=rowsumnint(bl);
+function y=rowsumnint(bl)
     [nn]=size(bl);
     bl2=bl*ones(nn(2),1);
     bl2=abs(bl2-bl2(1)*ones(nn(1),1));
@@ -572,8 +556,27 @@ function y=rowsumnint(bl);
    end 
 end
 
+function [A,partitions]=generate_partition_universal(G)
+% Dimension
+    if iscell(G)==1, 
+    N=length(G{1});
+    else N=length(G);
+    end
+    
+    A=[0];
+    for k=2:N;
+    B=[];
+    for l=1:size(A,1)
+       for m=0:max(A(l,:))+1 
+       B=[B; A(l,:) m];
+       end
+    end
+    A=B;
 
-
+    end
+    partitions=A;
+    A=A(1:end-1,:);
+end
 
 
 % end main function
