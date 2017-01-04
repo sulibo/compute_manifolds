@@ -29,10 +29,10 @@ Coupling = 1;
 At = A1;
 At = A2;
 tic
-[manifolds1 partitions1]= compute_manifolds_new(At,Coupling); 
+[manifolds1 partitions1]= compute_manifolds(At,Coupling); 
 toc
 tic
-[manifolds2 partitions2]= compute_manifolds(At,Coupling);
+[manifolds2 partitions2]= compute_manifolds_original(At,Coupling);
 toc
 Coupling = 2; 
 %manifolds = compute_manifolds_mod(A,Coupling);
