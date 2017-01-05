@@ -51,7 +51,7 @@ end
 % G is a cell 
 if couplingtype ==1
     if nargin ==3
-        tolerance = varagin{1};
+        tolerance = varargin{1};
     [A, partitions]=generate_partition_invasive(G,tolerance);
     else 
     [A, partitions]=generate_partition_invasive(G);
@@ -469,7 +469,7 @@ function [A,partitions]=generate_partition_invasive(G, varargin)
             else
         tolerance=varargin{1};
         tol=tolerance/max(abs(Grow(:)));
-        [Grows,IA,IC] = unique(Grow,tol);
+        [Grows,IA,IC] = uniquetol(Grow,tol);
             end
         end
 
@@ -509,7 +509,7 @@ function [A,partitions]=generate_partition_invasive(G, varargin)
         Gp=G{1,ii}*ones(N,1);
         tolerance=varargin{1};
         tol=tolerance/max(abs(Gp(:)));
-        [Gu,IA,Gp] = unique(Gp,tol) % IGi indicates which sums of row are equal w.r.t. the given tolerance
+        [Gu,IA,Gp] = uniquetol(Gp,tol) % IGi indicates which sums of row are equal w.r.t. the given tolerance
         end
         end
         Grow=[Grow Gp];
