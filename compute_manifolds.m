@@ -38,103 +38,38 @@ function [manifolds,partitions]=compute_manifolds(G,couplingtype,varargin);
 
 
 
-
+%% Initialization
 manifolds=[];
 
-%
-%
+% Dimensions
 if iscell(G)==1, 
     N=length(G{1});
 else N=length(G);
 end
 
-% part 1: create all combinations
+%% part 1: create all combinations
 % G is a cell 
-if iscell(G) 
-    [A, partitions]=generate_partition_universal(G);
-% G is a matrix 
-else
-    if couplingtype == 1 % Invasive
-        Grow = G*ones(size(G,2),1);
-        if norm(mod(G,1))==0
-        %disp('integer adjacency matrix')
-        [Grows,IA,IC] = unique(Grow);
-        else % non-integer row sum
-            if nargin~=3
-            disp('incorrected number of inputs (tolerance for non-integer adjacency matrix to be specified)');
-            return
-            else
-        epsilon=varargin{1};
-        tolu=epsilon/max(abs(Grow(:)));
-        [Grows,IA,IC] = unique(Grow,tolu);
-            end
-        end
-
-        if length(IA)==N
-            disp('No partial synchronization manifolds exists')
-            return
-        end
-
-        A=[0];
-        for k=2:N
-            B=[];
-            for l=1:size(A,1)
-                index=(IC(k)==IC(1:k-1));
-                Arow=A(l,:);
-                Arow=Arow';
-                Poss=unique(Arow(index));
-                Poss=[Poss;max(Arow)+1];
-                for m=1:length(Poss)
-                    B=[B;A(l,:) Poss(m)];
-                end
-            end
-            A=B;
-        end
-        partitions=A;
-        A=A(1:end-1,:);
-    else % Non invasive
-        A=[0;1];
-
-        for k=1:N-2;
-        B=[];
-        for l=1:size(A,1);
-            for m=0:max(A(l,:))+1, 
-                B=[B; [A(l,:) m]  ];
-            end
-        end
-        A=B;
-        end
-
-%disp('list of all partitions')
-
-A=[zeros(size(A,1),1) A];
-partitions=A;
-A=A(1:end-1,:);
-     
+if couplingtype ==1
+    if nargin ==3
+        tolerance = varagin{1};
+    [A, partitions]=generate_partition_invasive(G,tolerance);
+    else 
+    [A, partitions]=generate_partition_invasive(G);
     end
+else
+    [A, partitions]=generate_partition_universal(G);
+end
+
 %disp('click to continue')
 %pause
-end
-% part 2: check manifolds - conditions with row sums
 
-
-
-
+%% part 2: check manifolds - conditions with row sums
 
 if ~iscell(G),
 N=length(G);
 
-
-
-
-
-
 if norm(mod(G,1))==0,
 disp('integer adjacency matrix')
-
-
-
-
 
 manifolds=[];
 
@@ -227,13 +162,6 @@ else disp('invalid coupling type number')
 return
 end
     
-
-
-
-
-
-
-
 
 
 
@@ -341,26 +269,6 @@ end
 
 end
 end
-
-
-
-
-
-
-
-
-    
- 
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -481,57 +389,14 @@ end
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 %
 % iscell loop
 %
 end
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   
     
-% inline functions    
+%% inline functions    
     
 function y=rowsum(bl);
     [nn]=size(bl);
@@ -578,6 +443,100 @@ function [A,partitions]=generate_partition_universal(G)
     A=A(1:end-1,:);
 end
 
+function [A,partitions]=generate_partition_invasive(G, varargin)
+    % Dimension
+    if iscell(G)==1, 
+    N=length(G{1});
+    else N=length(G);
+    end
+    % G is a matrix
+    if ~iscell(G)
+    Grow = G*ones(size(G,2),1);
+        if norm(mod(G,1))==0
+        %disp('integer adjacency matrix')
+        [Grows,IA,IC] = unique(Grow);
+        else % non-integer row sum
+            if nargin~=2
+            disp('incorrected number of inputs (tolerance for non-integer adjacency matrix to be specified)');
+            return
+            else
+        tolerance=varargin{1};
+        tol=tolerance/max(abs(Grow(:)));
+        [Grows,IA,IC] = unique(Grow,tol);
+            end
+        end
 
+        if length(IA)==N
+            disp('No partial synchronization manifolds exists')
+            return
+        end
+
+        A=[0];
+        for k=2:N
+            B=[];
+            for l=1:size(A,1)
+                index=(IC(k)==IC(1:k-1));
+                Al=A(l,:)';
+                P=unique(Al(index));
+                P=[P;max(Al)+1];
+                for m=1:length(P)
+                    B=[B;A(l,:) P(m)];
+                end
+            end
+            A=B;
+        end
+        partitions=A;
+        A=A(1:end-1,:);
+  % G is a cell 
+    else 
+        r=size(G,2);  % G={G1, G2, ... Gr} 
+        Grow=[]; % matrix to store sum of row in G1, G2, ..., Gr
+        for ii=1:r
+        if norm(mod(G{1,ii},1))==0
+        Gp=G{1,ii}*ones(N,1);
+        else 
+        if nargin~=2
+            disp('incorrected number of inputs (tolerance for non-integer adjacency matrix to be specified)');
+            return
+        else
+        Gp=G{1,ii}*ones(N,1);
+        tolerance=varargin{1};
+        tol=tolerance/max(abs(Gp(:)));
+        [Gu,IA,Gp] = unique(Gp,tol) % IGi indicates which sums of row are equal w.r.t. the given tolerance
+        end
+        end
+        Grow=[Grow Gp];
+        end
+        IC=[];
+        for ii=1:N
+            index=[];
+            for jj=1:r
+            temp=(Grow(ii,jj)==Grow(:,jj));
+            index=[index temp];
+            end
+           IC=[IC prod(index,2)];
+        end
+        IC=unique(IC','rows');
+        IC=IC';
+        IC=IC*[1:size(IC,2)]';
+        
+        A=[0];
+        for k=2:N
+            B=[];
+            for l=1:size(A,1)
+                index=(IC(k)==IC(1:k-1));
+                Al=A(l,:)';
+                P=unique(Al(index));
+                P=[P;max(Al)+1];
+                for m=1:length(P)
+                    B=[B;A(l,:) P(m)];
+                end
+            end
+            A=B;
+        end
+        partitions=A;
+        A=A(1:end-1,:);
+    end 
+end 
 % end main function
 end
