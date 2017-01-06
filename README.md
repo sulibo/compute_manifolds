@@ -7,3 +7,4 @@
 **Obtaining the software:** Click [here](http://twr.cs.kuleuven.be/research/software/delay-control/manifolds) or download from this repository (compute_manifolds.m). Follow the instructions in the header. 
 
 **License:** The software is released under the GNU GPL v3.0 license.
+
