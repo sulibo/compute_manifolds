@@ -508,17 +508,22 @@ function [A,partitions]=generate_partition_invasive(G, varargin)
         Grow=[Grow Gp];
         end
         IC=[];
+        Skip=[];
         for ii=1:N
+            if any(ii==Skip)
+                continue;
+            end
             index=[];
             for jj=1:r
             temp=(Grow(ii,jj)==Grow(:,jj));
             index=[index temp];
             end
-           IC=[IC prod(index,2)];
+            index_com=prod(index,2); % find common indicator of constant row sum of all matrices 
+            Skip=[Skip;find(index_com)]; % store which nodes can be skipped
+            IC=[IC index_com];
         end
-        IC=unique(IC','rows');
-        IC=IC';
         IC=IC*[1:size(IC,2)]';
+
         
         A=[0];
         for k=2:N
