@@ -34,7 +34,8 @@ toc
 tic
 [manifolds2 partitions2]= compute_manifolds_original(A,Coupling);
 toc
-%unique(manifolds1-manifolds2)
+
+unique(manifolds1-manifolds2)
 
 %{
 % Test Invasive cases 
