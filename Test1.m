@@ -25,7 +25,18 @@ A2=[0 0 0 0 0 0 0 0;
     0 0 0 0 0 0 0 0];
 
 A = {A1,A2};
+% Test Invasive case and A as a cell 
+Coupling = 1;
+% A1 
+tic
+[manifolds1 partitions1]= compute_manifolds(A,Coupling); 
+toc
+tic
+[manifolds2 partitions2]= compute_manifolds_original(A,Coupling);
+toc
+%unique(manifolds1-manifolds2)
 
+%{
 % Test Invasive cases 
 Coupling = 1;
 % A1 
@@ -88,3 +99,4 @@ tic
 [manifolds2 partitions2]= compute_manifolds_original(Ar,Coupling,tol);
 toc
 unique(manifolds1-manifolds2)
+%}
