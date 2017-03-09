@@ -475,10 +475,10 @@ function [A,partitions]=generate_partition_invasive(G, varargin)
         for k=2:N
             B=[];
             for l=1:size(A,1)
-                index=(IC(k)==IC(1:k-1));  % check the system k have the same row sum with systems 1,2,...,k-1 
-                Al=A(l,:)';                        % the values of system k can choose from (not consinder row sum condition) 
-                P=unique(Al(index));        % the values of system k can choose from (consinder row sum condition) 
-                P=[P;max(Al)+1];             % the values of system k can choose from 
+                index=(IC(k)==IC(1:k-1));  % check the system k have the same row sum with system 1,2,..., 
+                Al=A(l,:)';
+                P=unique(Al(index));
+                P=[P;max(Al)+1];
                 for m=1:length(P)
                     B=[B;A(l,:) P(m)];
                 end
