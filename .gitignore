@@ -1,0 +1,12 @@
+# ignore asv 
+
+*.asv 
+
+# Test1.m 
+
+Test1.m 
+
+# compute_manifolds_original.m 
+
+compute_manifolds_original.m
+
