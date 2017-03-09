@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 function [manifolds,partitions]=compute_manifolds(G,couplingtype,varargin);
 
 % manifolds: all possible partial synchronization manifolds

@@ -81,40 +81,40 @@ for k=1:size(A,1)
     rij=A(k,:);
     [rijs,E]=sort(rij);
     EE=zeros(N,N);
-    for l=1:N
+    for l=1:N;
         EE(l,E(l))=1;
     end
     % reordened adjacancy matrix
     Gs=EE*G*EE';
     % indices= positions where new block begins
     indices=1;
-    for m=2:length(rijs)
-        if rijs(m)~=rijs(m-1)
+    for m=2:length(rijs);
+        if rijs(m)~=rijs(m-1),
             indices=[indices m];
         end
     end
     indices=[indices N+1];
     isman=1;
-    for tel1=1:(length(indices)-1)
-        for tel2=1:(length(indices)-1)
+    for tel1=1:(length(indices)-1);
+        for tel2=1:(length(indices)-1);
           %if tel1~=tel2,
             positionsh=indices(tel1):(indices(tel1+1)-1);
             positionsv=indices(tel2):(indices(tel2+1)-1);
             block= Gs(positionsh,positionsv); 
             blocksum=rowsum(block);
-            if blocksum==0
+            if blocksum==0,
                isman=0;
             end         
            if isman==0, break, end
         end
       if isman==0, break, end
     end
-    if isman==1
+    if isman==1,
         manifolds=[manifolds;rij]; 
     end
 end
 
-elseif couplingtype==2
+elseif couplingtype==2;
         disp('non-invasive coupling')
 
 for k=1:size(A,1)
@@ -122,28 +122,28 @@ for k=1:size(A,1)
     rij=A(k,:);
     [rijs,E]=sort(rij);
     EE=zeros(N,N);
-    for l=1:N
+    for l=1:N;
         EE(l,E(l))=1;
     end
     % reordened adjacancy matrix
     Gs=EE*G*EE';
     % indices= positions where new block begins
     indices=1;
-    for m=2:length(rijs)
-        if rijs(m)~=rijs(m-1)
+    for m=2:length(rijs);
+        if rijs(m)~=rijs(m-1),
             indices=[indices m];
         end
     end
     indices=[indices N+1];
     isman=1;
-    for tel1=1:(length(indices)-1)
-        for tel2=1:(length(indices)-1)
-          if tel1~=tel2
+    for tel1=1:(length(indices)-1);
+        for tel2=1:(length(indices)-1);
+          if tel1~=tel2,
             positionsh=indices(tel1):(indices(tel1+1)-1);
             positionsv=indices(tel2):(indices(tel2+1)-1);
             block= Gs(positionsh,positionsv); 
             blocksum=rowsum(block);
-            if blocksum==0
+            if blocksum==0,
                isman=0;
             end         
            if isman==0, break, end
@@ -151,7 +151,7 @@ for k=1:size(A,1)
         end
       if isman==0, break, end
     end
-    if isman==1
+    if isman==1,
         manifolds=[manifolds;rij]; 
     end
 end
@@ -177,7 +177,7 @@ epsilon=varargin{1};
 
 manifolds=[];
 
-if couplingtype==1
+if couplingtype==1;
     disp('invasive coupling')
 
 for k=1:size(A,1)
@@ -185,40 +185,40 @@ for k=1:size(A,1)
     rij=A(k,:);
     [rijs,E]=sort(rij);
     EE=zeros(N,N);
-    for l=1:N
+    for l=1:N;
         EE(l,E(l))=1;
     end
     % reordened adjacancy matrix
     Gs=EE*G*EE';
     % indices= positions where new block begins
     indices=1;
-    for m=2:length(rijs)
-        if rijs(m)~=rijs(m-1)
+    for m=2:length(rijs);
+        if rijs(m)~=rijs(m-1),
             indices=[indices m];
         end
     end
     indices=[indices N+1];
     isman=1;
-    for tel1=1:(length(indices)-1)
-        for tel2=1:(length(indices)-1)
+    for tel1=1:(length(indices)-1);
+        for tel2=1:(length(indices)-1);
           %if tel1~=tel2,
             positionsh=indices(tel1):(indices(tel1+1)-1);
             positionsv=indices(tel2):(indices(tel2+1)-1);
             block= Gs(positionsh,positionsv); 
             blocksum=rowsumnint(block);
-            if blocksum==0
+            if blocksum==0,
                isman=0;
             end         
            if isman==0, break, end
         end
       if isman==0, break, end
     end
-    if isman==1
+    if isman==1,
         manifolds=[manifolds;rij]; 
     end
 end
 
-elseif couplingtype==2
+elseif couplingtype==2;
         disp('non-invasive coupling')
 
 for k=1:size(A,1)
@@ -226,28 +226,28 @@ for k=1:size(A,1)
     rij=A(k,:);
     [rijs,E]=sort(rij);
     EE=zeros(N,N);
-    for l=1:N
+    for l=1:N;
         EE(l,E(l))=1;
     end
     % reordened adjacancy matrix
     Gs=EE*G*EE';
     % indices= positions where new block begins
     indices=1;
-    for m=2:length(rijs)
-        if rijs(m)~=rijs(m-1)
+    for m=2:length(rijs);
+        if rijs(m)~=rijs(m-1),
             indices=[indices m];
         end
     end
     indices=[indices N+1];
     isman=1;
-    for tel1=1:(length(indices)-1)
-        for tel2=1:(length(indices)-1)
-          if tel1~=tel2
+    for tel1=1:(length(indices)-1);
+        for tel2=1:(length(indices)-1);
+          if tel1~=tel2,
             positionsh=indices(tel1):(indices(tel1+1)-1);
             positionsv=indices(tel2):(indices(tel2+1)-1);
             block= Gs(positionsh,positionsv); 
             blocksum=rowsumnint(block);
-            if blocksum==0
+            if blocksum==0,
                isman=0;
             end         
            if isman==0, break, end
@@ -255,7 +255,7 @@ for k=1:size(A,1)
         end
       if isman==0, break, end
     end
-    if isman==1
+    if isman==1,
         manifolds=[manifolds;rij]; 
     end
 end
@@ -290,33 +290,33 @@ for k=1:size(A,1)
     rij=A(k,:);
     [rijs,E]=sort(rij);
     EE=zeros(N,N);
-    for l=1:N
+    for l=1:N;
         EE(l,E(l))=1;
     end
     % reordened adjacancy matrix
     %%
-    for kk=1:mm
+    for kk=1:mm,
           Gs{kk}=EE*G{kk}*EE';
     end
     % indices= positions where new block begins
     indices=1;
-    for m=2:length(rijs)
-        if rijs(m)~=rijs(m-1)
+    for m=2:length(rijs);
+        if rijs(m)~=rijs(m-1),
             indices=[indices m];
         end
     end
     indices=[indices N+1];
     isman=1;
-    for tel1=1:(length(indices)-1)
-        for tel2=1:(length(indices)-1)
+    for tel1=1:(length(indices)-1);
+        for tel2=1:(length(indices)-1);
           %if tel1~=tel2,
             positionsh=indices(tel1):(indices(tel1+1)-1);
             positionsv=indices(tel2):(indices(tel2+1)-1);
 		 %%	            
-		  for kk=1:mm
+		  for kk=1:mm,	
 		        block= Gs{kk}(positionsh,positionsv); 
                 blocksum=rowsum(block);
-                 if blocksum==0
+                 if blocksum==0,
                  isman=0;
                 end         
             end
@@ -326,12 +326,12 @@ for k=1:size(A,1)
         end
       if isman==0, break, end
     end
-    if isman==1
+    if isman==1,
         manifolds=[manifolds;rij]; 
     end
 end
 
-elseif couplingtype==2
+elseif couplingtype==2;
         disp('non-invasive coupling')
 
 for k=1:size(A,1)
@@ -339,34 +339,34 @@ for k=1:size(A,1)
     rij=A(k,:);
     [rijs,E]=sort(rij);
     EE=zeros(N,N);
-    for l=1:N
+    for l=1:N;
         EE(l,E(l))=1;
     end
     % reordened adjacancy matrices
     %%
-    for kk=1:mm
+    for kk=1:mm,
          Gs{kk}=EE*G{kk}*EE';
     end
     %%
     % indices= positions where new block begins
     indices=1;
-    for m=2:length(rijs)
-        if rijs(m)~=rijs(m-1)
+    for m=2:length(rijs);
+        if rijs(m)~=rijs(m-1),
             indices=[indices m];
         end
     end
     indices=[indices N+1];
     isman=1;
-    for tel1=1:(length(indices)-1)
-        for tel2=1:(length(indices)-1)
-          if tel1~=tel2
+    for tel1=1:(length(indices)-1);
+        for tel2=1:(length(indices)-1);
+          if tel1~=tel2,
             positionsh=indices(tel1):(indices(tel1+1)-1);
             positionsv=indices(tel2):(indices(tel2+1)-1);
 		 %%
-            for kk=1:mm
+            for kk=1:mm,
                  block= Gs{kk}(positionsh,positionsv); 
                  blocksum=rowsum(block);
-                 if blocksum==0
+                 if blocksum==0,
                     isman=0;
                  end
             end
@@ -376,7 +376,7 @@ for k=1:size(A,1)
         end
       if isman==0, break, end
     end
-    if isman==1
+    if isman==1,
         manifolds=[manifolds;rij]; 
     end
 end
@@ -395,14 +395,6 @@ end
 end
 
 
-
-
-
-
-
-
-
-   
     
 %% inline functions    
     
@@ -417,6 +409,7 @@ function y=rowsum(bl);
    end 
 end
     
+
 function y=rowsumnint(bl)
     [nn]=size(bl);
     bl2=bl*ones(nn(2),1);
@@ -482,10 +475,10 @@ function [A,partitions]=generate_partition_invasive(G, varargin)
         for k=2:N
             B=[];
             for l=1:size(A,1)
-                index=(IC(k)==IC(1:k-1));  % check the system k have the same row sum with systems 1,2,...,k-1 
-                Al=A(l,:)';                        % the values of system k can choose from (not consinder row sum condition) 
-                P=unique(Al(index));        % the values of system k can choose from (consinder row sum condition) 
-                P=[P;max(Al)+1];             % the values of system k can choose from 
+                index=(IC(k)==IC(1:k-1));  % check the system k have the same row sum with system 1,2,..., 
+                Al=A(l,:)';
+                P=unique(Al(index));
+                P=[P;max(Al)+1];
                 for m=1:length(P)
                     B=[B;A(l,:) P(m)];
                 end
