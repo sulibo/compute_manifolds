@@ -467,7 +467,7 @@ function [A,partitions]=generate_partition_invasive(G, varargin)
         end
 
         if length(IA)==N
-            disp('No partial synchronization manifolds exists')
+            disp('No partial synchronization manifolds exist')
             return
         end
 
@@ -476,9 +476,9 @@ function [A,partitions]=generate_partition_invasive(G, varargin)
             B=[];
             for l=1:size(A,1)
                 index=(IC(k)==IC(1:k-1));  % check the system k have the same row sum with systems 1,2,...,k-1 
-                Al=A(l,:)';                        % the values of system k can choose from (not consinder row sum condition) 
-                P=unique(Al(index));        % the values of system k can choose from (consinder row sum condition) 
-                P=[P;max(Al)+1];             % the values of system k can choose from 
+                Al=A(l,:)';                        %  the values of system k can be chosen from by the row sums
+                P=unique(Al(index));        %  remove duplicated entries
+                P=[P;max(Al)+1];             %  add the situation where the k system is in a new group 
                 for m=1:length(P)
                     B=[B;A(l,:) P(m)];
                 end
@@ -502,7 +502,11 @@ function [A,partitions]=generate_partition_invasive(G, varargin)
         Gp=G{1,ii}*ones(N,1);
         tolerance=varargin{1};
         tol=tolerance/max(abs(Gp(:)));
-        [Gu,IA,Gp] = uniquetol(Gp,tol) % IGi indicates which sums of row are equal w.r.t. the given tolerance
+        [Gu,IA,Gp] = uniquetol(Gp,tol) % Gp indicates which sums of row are equal w.r.t. the given tolerance
+            if length(IA)==N
+            disp('No partial synchronization manifolds exist')
+            return
+            end
         end
         end
         Grow=[Grow Gp];
@@ -522,6 +526,10 @@ function [A,partitions]=generate_partition_invasive(G, varargin)
             Skip=[Skip;find(index_com)]; % store which nodes can be skipped
             IC=[IC index_com];
         end
+            if size(IC,2)==N
+            disp('No partial synchronization manifolds exist')
+            return
+            end
         IC=IC*[1:size(IC,2)]';
 
         
