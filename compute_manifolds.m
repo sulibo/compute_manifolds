@@ -1,4 +1,4 @@
-function [manifolds,partitions]=compute_manifolds(G,couplingtype,varargin);
+function [manifolds,partitions]=compute_manifolds(G,couplingtype,F,varargin);
 
 % manifolds: all possible partial synchronization manifolds
 % partitions: all possible partitions of the systems
@@ -33,8 +33,8 @@ function [manifolds,partitions]=compute_manifolds(G,couplingtype,varargin);
 %
 % Based on the the input type of G, the function automatically
 % decides between case 3) and cases 1)-2)
-
-
+%
+% 4) F indicates the type of dynamics in each node
 
 
 
@@ -50,7 +50,7 @@ end
 %% part 1: create all combinations
 % G is a cell 
 if couplingtype ==1
-    if nargin ==3
+    if nargin ==4
         tolerance = varargin{1};
     [A, partitions]=generate_partition_invasive(G,tolerance);
     else 
@@ -167,7 +167,7 @@ end
 
 else % non-integer row sum
 
-if nargin~=3
+if nargin~=4
 disp('incorrected number of inputs (tolerance for non-integer adjacency matrix to be specified)');
 return
 else
@@ -421,7 +421,7 @@ function y=rowsumnint(bl)
    end 
 end
 
-function [A,partitions]=generate_partition_universal(G)
+function [A,partitions]=generate_partition_universal(G,F)
 % Dimension
     if iscell(G)==1, 
     N=length(G{1});
@@ -443,7 +443,7 @@ function [A,partitions]=generate_partition_universal(G)
     A=A(1:end-1,:);
 end
 
-function [A,partitions]=generate_partition_invasive(G, varargin)
+function [A,partitions]=generate_partition_invasive(G, F, varargin)
     % Dimension
     if iscell(G)==1, 
     N=length(G{1});
@@ -456,7 +456,7 @@ function [A,partitions]=generate_partition_invasive(G, varargin)
         %disp('integer adjacency matrix')
         [Grows,IA,IC] = unique(Grow);
         else % non-integer row sum
-            if nargin~=2
+            if nargin~=3
             disp('incorrected number of inputs (tolerance for non-integer adjacency matrix to be specified)');
             return
             else
@@ -475,10 +475,10 @@ function [A,partitions]=generate_partition_invasive(G, varargin)
         for k=2:N
             B=[];
             for l=1:size(A,1)
-                index=(IC(k)==IC(1:k-1));  % check the system k have the same row sum with systems 1,2,...,k-1 
-                Al=A(l,:)';                        %  the values of system k can be chosen from by the row sums
-                P=unique(Al(index));        %  remove duplicated entries
-                P=[P;max(Al)+1];             %  add the situation where the k system is in a new group 
+                index=(IC(k)==IC(1:k-1));  %  check the system k have the same row sum with systems 1,2,...,k-1 
+                Al=A(l,:)';                %  the values of system k can be chosen from by the row sums
+                P=unique(Al(index));       %  remove duplicated entries
+                P=[P;max(Al)+1];           %  add the situation where the k system is in a new group 
                 for m=1:length(P)
                     B=[B;A(l,:) P(m)];
                 end
@@ -492,25 +492,26 @@ function [A,partitions]=generate_partition_invasive(G, varargin)
         r=size(G,2);  % G={G1, G2, ... Gr} 
         Grow=[]; % matrix to store sum of row in G1, G2, ..., Gr
         for ii=1:r
-        if norm(mod(G{1,ii},1))==0
-        Gp=G{1,ii}*ones(N,1);
-        else 
-        if nargin~=2
-            disp('incorrected number of inputs (tolerance for non-integer adjacency matrix to be specified)');
-            return
-        else
-        Gp=G{1,ii}*ones(N,1);
-        tolerance=varargin{1};
-        tol=tolerance/max(abs(Gp(:)));
-        [Gu,IA,Gp] = uniquetol(Gp,tol) % Gp indicates which sums of row are equal w.r.t. the given tolerance
-            if length(IA)==N
-            disp('No partial synchronization manifolds exist')
-            return
+            if norm(mod(G{1,ii},1))==0
+                Gp=G{1,ii}*ones(N,1);
+            else 
+                if nargin~=3
+                    disp('incorrected number of inputs (tolerance for non-integer adjacency matrix to be specified)');
+                    return
+                else
+                    Gp=G{1,ii}*ones(N,1);
+                    tolerance=varargin{1};
+                    tol=tolerance/max(abs(Gp(:)));
+                    [Gu,IA,Gp] = uniquetol(Gp,tol) % Gp indicates which sums of row are equal w.r.t. the given tolerance
+                    if length(IA)==N
+                        disp('No partial synchronization manifolds exist')
+                        return
+                    end
+                end
             end
+            Grow=[Grow Gp];
         end
-        end
-        Grow=[Grow Gp];
-        end
+        Grow=[Grow F];  % add dynamics indicator
         IC=[];
         Skip=[];
         for ii=1:N
@@ -518,9 +519,9 @@ function [A,partitions]=generate_partition_invasive(G, varargin)
                 continue;
             end
             index=[];
-            for jj=1:r
-            temp=(Grow(ii,jj)==Grow(:,jj));
-            index=[index temp];
+            for jj=1:(r+1)
+                temp=(Grow(ii,jj)==Grow(:,jj));
+                index=[index temp];
             end
             index_com=prod(index,2); % find common indicator of constant row sum of all matrices 
             Skip=[Skip;find(index_com)]; % store which nodes can be skipped
