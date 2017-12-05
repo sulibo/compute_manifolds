@@ -1,4 +1,4 @@
-function [manifolds,partitions]=compute_manifolds(G,couplingtype,F,varargin);
+function [manifolds,partitions]=compute_manifolds(G,couplingtype,F,varargin)
 
 % manifolds: all possible partial synchronization manifolds
 % partitions: all possible partitions of the systems
@@ -41,10 +41,16 @@ function [manifolds,partitions]=compute_manifolds(G,couplingtype,F,varargin);
 %% Initialization
 manifolds=[];
 
+% Check system dynamics differences 
+ if length(unique(F))==N
+    disp('All system dynamics are different. No partial synchronization manifolds exist.')
+    return
+ end
 % Dimensions
-if iscell(G)==1, 
+if iscell(G)==1 
     N=length(G{1});
-else N=length(G);
+else
+    N=length(G);
 end
 
 %% part 1: create all combinations
@@ -65,15 +71,15 @@ end
 
 %% part 2: check manifolds - conditions with row sums
 
-if ~iscell(G),
+if ~iscell(G)
 N=length(G);
 
-if norm(mod(G,1))==0,
+if norm(mod(G,1))==0
 disp('integer adjacency matrix')
 
 manifolds=[];
 
-if couplingtype==1;
+if couplingtype==1
     disp('invasive coupling')
 
 for k=1:size(A,1)
@@ -282,7 +288,7 @@ mm=length(G);
 
 manifolds=[];
 
-if couplingtype==1;
+if couplingtype==1
     disp('invasive coupling')
 
 for k=1:size(A,1)
@@ -406,11 +412,11 @@ end
     
 %% inline functions    
     
-function y=rowsum(bl);
+function y=rowsum(bl)
     [nn]=size(bl);
     bl2=bl*ones(nn(2),1);
     bl2=abs(bl2-bl2(1)*ones(nn(1),1));
-   if max(bl2)==0,
+   if max(bl2)==0
        y=1;
    else
        y=0;
@@ -421,7 +427,7 @@ function y=rowsumnint(bl)
     [nn]=size(bl);
     bl2=bl*ones(nn(2),1);
     bl2=abs(bl2-bl2(1)*ones(nn(1),1));
-   if max(bl2)<epsilon,
+   if max(bl2)<epsilon
        y=1;
    else
        y=0;
@@ -430,21 +436,24 @@ end
 
 function [A,partitions]=generate_partition_universal(G,F)
 % Dimension
-    if iscell(G)==1, 
+    if iscell(G)==1 
     N=length(G{1});
     else N=length(G);
     end
-    
-    A=[0];
-    for k=2:N;
-    B=[];
-    for l=1:size(A,1)
-       for m=0:max(A(l,:))+1 
-       B=[B; A(l,:) m];
-       end
-    end
-    A=B;
 
+    A=[0];
+    for k=2:N
+        B=[];
+        for l=1:size(A,1)
+            index=(F(k)==F(1:k-1));     %  check the system k have the same dynamics with systems 1,2,...,k-1 
+            Al=A(l,:)';                          %  the values of system k can be chosen from based on the row sums
+            P=unique(Al(index));         %  remove duplicated entries
+            P=[P;max(Al)+1];              %  add the situation where the k system is in a new group 
+            for m=1:length(P)
+                B=[B;A(l,:) P(m)];
+            end
+         end
+         A=B;
     end
     partitions=A;
     A=A(1:end-1,:);
@@ -452,7 +461,7 @@ end
 
 function [A,partitions]=generate_partition_invasive(G, F, varargin)
     % Dimension
-    if iscell(G)==1, 
+    if iscell(G)==1 
     N=length(G{1});
     else N=length(G);
     end
@@ -472,20 +481,39 @@ function [A,partitions]=generate_partition_invasive(G, F, varargin)
         [Grows,IA,IC] = uniquetol(Grow,tol);
             end
         end
-
+        
         if length(IA)==N
             disp('No partial synchronization manifolds exist')
             return
         end
-
+        Grow=[IC F];
+         Skip=[];
+        for ii=1:N
+            if any(ii==Skip)
+                continue;
+            end
+            index=[];
+            for jj=1:size(Grow,2)
+                temp=(Grow(ii,jj)==Grow(:,jj));
+                index=[index temp];
+            end
+            index_com=prod(index,2); % find common indicator of constant row sum of all matrices 
+            Skip=[Skip;find(index_com)]; % store which nodes can be skipped
+            IC=[IC index_com];
+        end       
+            if size(IC,2)==N
+            disp('No partial synchronization manifolds exist')
+            return
+            end
+        IC=IC*[1:size(IC,2)]';      
         A=[0];
         for k=2:N
             B=[];
             for l=1:size(A,1)
                 index=(IC(k)==IC(1:k-1));  %  check the system k have the same row sum with systems 1,2,...,k-1 
-                Al=A(l,:)';                %  the values of system k can be chosen from by the row sums
-                P=unique(Al(index));       %  remove duplicated entries
-                P=[P;max(Al)+1];           %  add the situation where the k system is in a new group 
+                Al=A(l,:)';                          %  the values of system k can be chosen from based on the row sums
+                P=unique(Al(index));         %  remove duplicated entries
+                P=[P;max(Al)+1];              %  add the situation where the k system is in a new group 
                 for m=1:length(P)
                     B=[B;A(l,:) P(m)];
                 end
