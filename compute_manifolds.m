@@ -1,4 +1,4 @@
-function [manifolds,partitions]=compute_manifolds(G,couplingtype,F,varargin)
+function [PS,manifolds,partitions]=compute_manifolds(G,couplingtype,F,varargin)
 
 % manifolds: all possible partial synchronization manifolds
 % partitions: all possible partitions of the systems
@@ -42,7 +42,7 @@ function [manifolds,partitions]=compute_manifolds(G,couplingtype,F,varargin)
 manifolds=[];
 
 % Check system dynamics differences 
- if length(unique(F))==N
+ if length(unique(F))==length(F)
     disp('All system dynamics are different. No partial synchronization manifolds exist.')
     return
  end
@@ -58,19 +58,19 @@ end
 if couplingtype ==1
     if nargin ==4
         tolerance = varargin{1};
-    [A, partitions]=generate_partition_invasive(G,tolerance);
+    [A, partitions]=generate_partition_invasive(G,F, tolerance);
     else 
-    [A, partitions]=generate_partition_invasive(G);
+    [A, partitions]=generate_partition_invasive(G,F);
     end
 else
-    [A, partitions]=generate_partition_universal(G);
+    [A, partitions]=generate_partition_universal(G,F);
 end
 
 %disp('click to continue')
 %pause
 
 %% part 2: check manifolds - conditions with row sums
-
+R={}; %cell for storage of reorder matrix
 if ~iscell(G)
 N=length(G);
 
@@ -117,6 +117,7 @@ for k=1:size(A,1)
     end
     if isman==1
         manifolds=[manifolds;rij]; 
+        R{end+1}=EE';
     end
 end
 
@@ -159,6 +160,7 @@ for k=1:size(A,1)
     end
     if isman==1
         manifolds=[manifolds;rij]; 
+        R{end+1}=EE';
     end
 end
 
@@ -221,6 +223,7 @@ for k=1:size(A,1)
     end
     if isman==1
         manifolds=[manifolds;rij]; 
+        R{end+1}=EE';
     end
 end
 
@@ -263,6 +266,7 @@ for k=1:size(A,1)
     end
     if isman==1
         manifolds=[manifolds;rij]; 
+        R{end+1}=EE';
     end
 end
 
@@ -334,6 +338,7 @@ for k=1:size(A,1)
     end
     if isman==1
         manifolds=[manifolds;rij]; 
+        R{end+1}=EE';
     end
 end
 
@@ -384,6 +389,7 @@ for k=1:size(A,1)
     end
     if isman==1
         manifolds=[manifolds;rij]; 
+        R{end+1}=EE';
     end
 end
 
@@ -400,12 +406,62 @@ end
 %
 end
 
+%% part 3 dynamics seperation 
 
-
-
-
-
-
+if ~iscell(G)
+   A=G;
+   if couplingtype==1 % Invasive coupling 
+   PS(size(manifolds,1))=struct('manifold',[],'R',[],'Ared',[],'Asyn',[]);
+   size(manifolds,1)
+    for kk=1:size(manifolds,1)
+        manifold=manifolds(kk,:);
+        [Ared, Asyn] = dynamic_seperation_invasive(A,manifold,R{kk});
+        PS(kk)=struct('manifold',manifold,'R',R{kk},'Ared',Ared,'Asyn',Asyn);
+    end
+   end
+   if couplingtype==2 % Non-invasive coulpling 
+   PS(size(manifolds,1))=struct('manifold',[],'R',[],'Lred',[],'Asyn',[]);
+    for kk=1:size(manifolds,1)
+        manifold=manifolds(kk,:);
+        [Lred, Asyn] = dynamic_seperation_non_invasive(A,manifold,R{kk});
+        PS(kk)=struct('manifold',manifold,'R',R{kk},'Lred',Lred,'Asyn',Asyn);
+    end
+   end
+else  % G is a cell
+   if couplingtype==1 % Invasive coupling 
+   PS(size(manifolds,1))=struct('manifold',[],'R',[],'Ared',[],'Asyn',[]);
+    for kk=1:size(manifolds,1)
+        manifold=manifolds(kk,:);
+        Ared={};
+        Asyn={};
+          for ll=1:size(G,2)
+              A=G{1,ll};
+              [Ared{1,end+1}, Asyn{1,end+1}] = dynamic_seperation_invasive(A,manifold,R{kk});
+          end
+        PS(kk).manifold=manifold;
+        PS(kk).R=R{kk};
+        PS(kk).Ared=Ared;
+        PS(kk).Asyn=Asyn;
+    end
+   end
+   if couplingtype==2 % Non-invasive coulpling 
+   PS(size(manifolds,1))=struct('manifold',[],'R',[],'Ared',[],'Asyn',[]);
+       for kk=1:size(manifolds,1)
+        manifold=manifolds(kk,:);
+        Lred={};
+        Asyn={};
+        for ll=1:size(G,2)
+              A=G{1,ll};
+              [Lred{1,end+1}, Asyn{1,end+1}] = dynamic_seperation_non_invasive(A,manifold,R{kk});
+        end
+        PS(kk).manifold=manifold;
+        PS(kk).R=R{kk};
+        PS(kk).Lred=Lred;
+        PS(kk).Asyn=Asyn;
+       end
+   end
+   
+end
 
 
    
@@ -587,5 +643,78 @@ function [A,partitions]=generate_partition_invasive(G, F, varargin)
         A=A(1:end-1,:);
     end 
 end 
+    function [Ared,Asyn]=dynamic_seperation_invasive(A,manifold,R)
+        % A: adjacency matrix 
+        % manifold: one manifold presented as a row vector (manifolds{i,:})
+        % R: reordering matrix associated with one manifolds, R{i}
+        val=unique(manifold);
+        kappa=sum(bsxfun(@eq,val,manifold(:))); % number of nodes in each cluster
+        K=length(unique(manifold));  % number of clusters 
+        Are=[];
+        Are=R'*A*R;
+        T1=zeros(N-K,N);
+        T2=zeros(N-K,N);
+        indexr=1;
+        indexc=1;
+        Rs=[];
+        indices=[];
+        for mm=1:length(kappa)
+            indices=[indices indexc];
+            T1([indexr:indexr+kappa(mm)-2],[indexc+1:indexc+kappa(mm)-1])=eye(kappa(mm)-1);
+            T2([indexr:indexr+kappa(mm)-2],indexc)=ones(kappa(mm)-1,1);
+            indexr=indexr+kappa(mm)-1;
+            indexc=indexc+kappa(mm);
+        end
+        Rij=[];
+        for ii=1:K
+            for jj=1:K
+                Rij(ii,jj)=sum(Are(indices(ii),[indices(jj):indices(jj)+kappa(jj)-1]));
+            end
+        end
+        Rs=sum(Rij,2);
+        Ared=T1*Are*T1'-T2*Are*T1';
+        Asyn=Rij;        
+    end
+ function [Lred,Asyn]=dynamic_seperation_non_invasive(A,manifold,R)
+        % A: adjacency matrix 
+        % manifold: one manifold presented as a row vector (manifolds{i,:})
+        % R: reordering matrix associated with one manifolds, R{i}
+        val=unique(manifold);
+        kappa=sum(bsxfun(@eq,val,manifold(:))); % number of nodes in each cluster
+        K=length(unique(manifold));  % number of clusters 
+        Are=[];
+        Are=R'*A*R;
+        T1=zeros(N-K,N);
+        T2=zeros(N-K,N);
+        indexr=1;
+        indexc=1;
+        indices=[];
+        for mm=1:length(kappa)
+            indices=[indices indexc];
+            T1([indexr:indexr+kappa(mm)-2],[indexc+1:indexc+kappa(mm)-1])=eye(kappa(mm)-1);
+            T2([indexr:indexr+kappa(mm)-2],indexc)=ones(kappa(mm)-1,1);
+            indexr=indexr+kappa(mm)-1;
+            indexc=indexc+kappa(mm);
+        end
+        Rij=[];
+        for ii=1:K
+            for jj=1:K
+                Rij(ii,jj)=sum(Are(indices(ii),[indices(jj):indices(jj)+kappa(jj)-1]));
+                if ii==jj
+                    Rij(ii,jj)=0;
+                end
+            end
+        end
+        Rs=sum(Are,2);
+        Rs=Rs(indices);
+        Ared=T1*Are*T1'-T2*Are*T1';
+        Dred={};
+        for ii=1:K
+            Dred{end+1}=Rs(ii)*eye(kappa(ii)-1);
+        end
+        Dred=blkdiag(Dred{:});
+        Lred=Dred-Ared;
+        Asyn=Rij;        
+ end
 % end main function
 end
