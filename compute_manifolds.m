@@ -705,14 +705,10 @@ end
                 end
             end
         end
-        Rs=sum(Are,2);
-        Rs=Rs(indices);
         Ared=T1*Are*T1'-T2*Are*T1';
-        Dred={};
-        for ii=1:K
-            Dred{end+1}=Rs(ii)*eye(kappa(ii)-1);
-        end
-        Dred=blkdiag(Dred{:});
+        Rs=sum(Are,2);
+        Rs(indices)=[];
+        Dred=diag(Rs);
         Lred=Dred-Ared;
         Asyn=Rij;        
  end
