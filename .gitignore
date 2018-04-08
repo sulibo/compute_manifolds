@@ -1,3 +1,4 @@
+.gitignore
 # ignore asv 
 
 *.asv 
@@ -5,6 +6,7 @@
 # Test1.m 
 
 Test1.m 
+Test2.m
 
 # compute_manifolds_original.m 
 

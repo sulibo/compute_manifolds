@@ -40,10 +40,12 @@ function [PS,manifolds,partitions]=compute_manifolds(G,couplingtype,F,varargin)
 
 %% Initialization
 manifolds=[];
+partitions=[];
 
 % Check system dynamics differences 
  if length(unique(F))==length(F)
     disp('All system dynamics are different. No partial synchronization manifolds exist.')
+    PS=[];
     return
  end
 % Dimensions
@@ -407,12 +409,15 @@ end
 end
 
 %% part 3 dynamics seperation 
-
+if isempty(manifolds)
+    PS=[];
+    return
+end
 if ~iscell(G)
    A=G;
    if couplingtype==1 % Invasive coupling 
    PS(size(manifolds,1))=struct('manifold',[],'R',[],'Ared',[],'Asyn',[]);
-   size(manifolds,1)
+
     for kk=1:size(manifolds,1)
         manifold=manifolds(kk,:);
         [Ared, Asyn] = dynamic_seperation_invasive(A,manifold,R{kk});
@@ -491,6 +496,9 @@ function y=rowsumnint(bl)
 end
 
 function [A,partitions]=generate_partition_universal(G,F)
+% Initialization 
+    A=[];
+    partitions=[];
 % Dimension
     if iscell(G)==1 
     N=length(G{1});
@@ -516,6 +524,8 @@ function [A,partitions]=generate_partition_universal(G,F)
 end
 
 function [A,partitions]=generate_partition_invasive(G, F, varargin)
+    A=[];
+    partitions=[];
     % Dimension
     if iscell(G)==1 
     N=length(G{1});
@@ -557,11 +567,11 @@ function [A,partitions]=generate_partition_invasive(G, F, varargin)
             Skip=[Skip;find(index_com)]; % store which nodes can be skipped
             IC=[IC index_com];
         end       
+        IC=IC*[1:size(IC,2)]';      
             if size(IC,2)==N
             disp('No partial synchronization manifolds exist')
             return
             end
-        IC=IC*[1:size(IC,2)]';      
         A=[0];
         for k=2:N
             B=[];
@@ -618,11 +628,12 @@ function [A,partitions]=generate_partition_invasive(G, F, varargin)
             Skip=[Skip;find(index_com)]; % store which nodes can be skipped
             IC=[IC index_com];
         end
+        
+            IC=IC*[1:size(IC,2)]';
             if size(IC,2)==N
             disp('No partial synchronization manifolds exist')
             return
             end
-        IC=IC*[1:size(IC,2)]';
 
         
         A=[0];
@@ -643,10 +654,13 @@ function [A,partitions]=generate_partition_invasive(G, F, varargin)
         A=A(1:end-1,:);
     end 
 end 
-    function [Ared,Asyn]=dynamic_seperation_invasive(A,manifold,R)
-        % A: adjacency matrix 
-        % manifold: one manifold presented as a row vector (manifolds{i,:})
-        % R: reordering matrix associated with one manifolds, R{i}
+ function [Ared,Asyn]=dynamic_seperation_invasive(A,manifold,R)
+    % Initialization 
+    Ared=[];
+    Asyn=[];
+    % A: adjacency matrix 
+    % manifold: one manifold presented as a row vector (manifolds{i,:})
+    % R: reordering matrix associated with one manifolds, R{i}
         val=unique(manifold);
         kappa=sum(bsxfun(@eq,val,manifold(:))); % number of nodes in each cluster
         K=length(unique(manifold));  % number of clusters 
@@ -676,6 +690,9 @@ end
         Asyn=Rij;        
     end
  function [Lred,Asyn]=dynamic_seperation_non_invasive(A,manifold,R)
+     % Initialization 
+     Lred=[];
+     Asyn=[];
         % A: adjacency matrix 
         % manifold: one manifold presented as a row vector (manifolds{i,:})
         % R: reordering matrix associated with one manifolds, R{i}
