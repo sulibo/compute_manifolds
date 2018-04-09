@@ -6,14 +6,14 @@ function [PS,manifolds,partitions]=compute_manifolds(G,couplingtype,F,varargin)
 % use: 
 % 1) adjacency matrix consisting of integer elments:
 %
-% manifolds=compute_manifolds(G,couplingtype);
+% manifolds=compute_manifolds(G,couplingtype,F);
 % G: adjacency matrix 
 % coupling type: 1 (invasive coupling) or 2 (non-invasive coupling)
 %
 % 
 % 2) real adjacency matrix not consisting of integer elments:
 %
-% manifolds=compute_manifolds(G,couplingtype,tolerance);
+% manifolds=compute_manifolds(G,couplingtype,tolerance,F);
 % G: adjacency matrix 
 % coupling type: 1 (invasive coupling) or 2 (non-invasive coupling)
 % tolerance: tolerance in comparison of row-sums (finite precision
