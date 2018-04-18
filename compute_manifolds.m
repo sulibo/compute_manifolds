@@ -1,7 +1,15 @@
 function [PS,manifolds,partitions]=compute_manifolds(G,couplingtype,F,varargin)
-
+% Version 3.0
 % manifolds: all possible partial synchronization manifolds
 % partitions: all possible partitions of the systems
+% PS: array of structures with - manifolds 
+%                                           - R: reordering matrix 
+%                                           - Ared/Lred: synchronization error dynamics 
+%                                              related matrices (Ared for invasive coupling, Lred
+%                                              for non-invasive coupling)
+%                                           - Asyn: adjancency matrix of the reduced
+%                                              network 
+% 
 
 % use: 
 % 1) adjacency matrix consisting of integer elments:
@@ -9,7 +17,7 @@ function [PS,manifolds,partitions]=compute_manifolds(G,couplingtype,F,varargin)
 % manifolds=compute_manifolds(G,couplingtype,F);
 % G: adjacency matrix 
 % coupling type: 1 (invasive coupling) or 2 (non-invasive coupling)
-%
+% F: indicator of dyanmics types
 % 
 % 2) real adjacency matrix not consisting of integer elments:
 %
